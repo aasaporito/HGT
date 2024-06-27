@@ -1,18 +1,29 @@
 import os
 import subprocess
 import tqdm
+import tomllib
 
 
 class UnalignedSeqFinder:
-    def __init__(self, sam_file, output_file="results"):
-        self.sam_file = sam_file
+    def __init__(self, output_file="results"):
         self.sequence_dict = {}
         self.unaligned_seq_list = []
         self.realigned_seqs = {}
 
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
+
+        with open(self.parent_dir + "/settings.toml", 'rb') as f:
+            toml = tomllib.load(f)
+
         self.output_file = output_file
+        self.sam_file = toml["file-paths"]["input-sam"]
+
+        self.fragments_per_seq = toml['settings']['frags-per-seq']
+        self.min_matched_frags = toml['settings']['min-matched-frags']
+
+        self.args_minimap = toml["minimap2"]["options"]
+        self.ref_file = toml["minimap2"]["reference-file"]
 
     def process_sam(self):
         print("Processing SAM input:")
@@ -30,8 +41,8 @@ class UnalignedSeqFinder:
                         if sequence_name in self.sequence_dict:
                             self.sequence_dict[sequence_name] = [(is_aligned and self.sequence_dict[sequence_name]),
                                                                  sequence, sequence_name]
-                            if self.sequence_dict[sequence_name][
-                                0]:  # If sequence is aligned we don't need to store its sequence.
+                            # If sequence is aligned we don't need to store its sequence.
+                            if self.sequence_dict[sequence_name][0]:
                                 self.sequence_dict[sequence_name][1] = None
 
                         else:
@@ -50,20 +61,15 @@ class UnalignedSeqFinder:
         del self.sequence_dict
         print("Completed SAM Processing")
 
-    def fragment_seq(self, slices=10):
-        print("Slicing unaligned Sequences:")
+    def fragment_seq(self):
+        print("Slicing unaligned sequences:")
         with open(f"{self.temp_dir}/unaligned_seq_frags.fasta", "w") as outfile:
-            # with tqdm.tqdm(total=os.path.getsize(f"{self.temp_dir}/unaligned_seqs.gt")) as pbar:
-            # with open(f"{self.temp_dir}/unaligned_seqs.gt", "r") as f:
-            # for line in f:
-            # pbar.update(len(line))
-            # sequence_name, sequence = line.split('\t')
             for sequence_name, sequence in tqdm.tqdm(self.unaligned_seq_list):
-                frag_len = len(sequence) // 10
+                frag_len = len(sequence) // self.fragments_per_seq
 
-                for i in range(slices):
+                for i in range(self.fragments_per_seq):
                     start_idx = i * frag_len
-                    end_idx = start_idx + frag_len if i != slices - 1 else len(sequence)
+                    end_idx = start_idx + frag_len if i != self.fragments_per_seq - 1 else len(sequence)
 
                     outfile.write(f">{sequence_name}_frag_{i + 1}\n")
                     outfile.write(f"{sequence[start_idx:end_idx]}\n")
@@ -73,20 +79,14 @@ class UnalignedSeqFinder:
 
     def realign_fragments(self):
         print("Running minimap2 to realign reads")
-        # f = open(f"{self.temp_dir}/realigned.sam", "w")
-        # # minimap2-2.28_x64-linux/minimap2 -t 5 -I 2G -K 300M -w 25 -ax map-hifi --sam-hit-only all_bacteria.fasta.gz unaligned_seq_frags.fasta out> 'realigned.sam'
-        # subprocess.run(
-        #     [f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2", "-t 5", "-I 1G", "-n 200M", "-w 25", "-ax",
-        #      "map-hifi", "--sam-hit-only", "/media/aaron/FF7F-91E7/all_bacteria.fasta.gz",
-        #      f"{self.temp_dir}/unaligned_seq_frags.fasta"], stdout=f)
-        # f.close()
         subprocess.run(
-            f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2 -t 5 -I 1G -K 200M -w 25 -ax map-hifi --sam-hit-only /media/aaron/FF7F-91E7/all_bacteria.fasta.gz {self.temp_dir}/unaligned_seq_frags.fasta > '{self.temp_dir}/realigned.sam'",
+            f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2 {self.args_minimap} -a --sam-hit-only "
+            f"{self.ref_file} {self.temp_dir}/unaligned_seq_frags.fasta > {self.temp_dir}/realigned.sam",
             shell=True)
         print("Completed realignment")
 
     #  Will always be given a .sam file processed to only include aligned sequences (--sam-hit-only)
-    def recollect_fragments(self, min_frags=10):
+    def recollect_fragments(self):
         print("Analyzing realigned fragments")
         with tqdm.tqdm(total=os.path.getsize(f"{self.temp_dir}/realigned.sam")) as pbar:
             with open(f"{self.temp_dir}realigned.sam", "r") as infile:
@@ -128,16 +128,13 @@ class UnalignedSeqFinder:
             genome_count = len(entry.genomes)
 
             # Not enough aligned fragments or not enough species -> no results
-            if genome_count < 2 or frag_count < min_frags:
+            if genome_count < 2 or frag_count < self.min_matched_frags:
                 continue
 
             for pair in sorted(entry.pairs, key=lambda pair: pair[1]):
                 output_str = f"{pair[0]}\t{pair[1]}\tAS:i:{str(pair[2])}\n"
                 output += output_str
-                # print(output_str)
             output += "\n"
-            # output_str = f"{seq_name}\t{genome}\tAS:i:{str(alignment_score)}\n"
-            # output += output_str
 
         with open(f"{self.parent_dir}/Output/{self.output_file}.txt", "w") as f:
             f.write(output)
@@ -156,8 +153,8 @@ class SequenceData:
         return f"({self.sequence}, {self.genomes}, {self.fragments}, {self.pairs})"
 
 
-finder = UnalignedSeqFinder("/media/aaron/FF7F-91E7/Raw Data/PB644_EB813.hifi_reads.sam", "res1")
+finder = UnalignedSeqFinder()
 finder.process_sam()
 finder.fragment_seq()
-finder.realign_fragments()  # syscall
+finder.realign_fragments()
 finder.recollect_fragments()

@@ -1,10 +1,9 @@
 [file-paths]
-input-sam = ""
-output-name = ""
+input-sam = "/media/aaron/FF7F-91E7/Raw Data/PB644_EB813.hifi_reads.sam"
 
 [settings]
-min-matched-frags = 10 #
-frags-per-seq = 10
+min-matched-frags = 5 # Note if this is greater than frags-per-seq, there will be no valid results.
+frags-per-seq = 5
 
 
 [minimap2]
@@ -13,5 +12,5 @@ frags-per-seq = 10
 
 # Example:
 # options = "-t 5 -I 1G -K 200M -w 25 -x map-hifi"
-options = ""
-reference-file = ""
+options = "-t 5 -I 1G -K 200M -w 25 -x map-hifi"
+reference-file = "/media/aaron/FF7F-91E7/all_bacteria.fasta.gz"
