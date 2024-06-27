@@ -80,7 +80,9 @@ class UnalignedSeqFinder:
         #      "map-hifi", "--sam-hit-only", "/media/aaron/FF7F-91E7/all_bacteria.fasta.gz",
         #      f"{self.temp_dir}/unaligned_seq_frags.fasta"], stdout=f)
         # f.close()
-        subprocess.run(f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2 -t 5 -I 1G -K 200M -w 25 -ax map-hifi --sam-hit-only /media/aaron/FF7F-91E7/all_bacteria.fasta.gz {self.temp_dir}/unaligned_seq_frags.fasta > '{self.temp_dir}/realigned.sam'", shell=True)
+        subprocess.run(
+            f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2 -t 5 -I 1G -K 200M -w 25 -ax map-hifi --sam-hit-only /media/aaron/FF7F-91E7/all_bacteria.fasta.gz {self.temp_dir}/unaligned_seq_frags.fasta > '{self.temp_dir}/realigned.sam'",
+            shell=True)
         print("Completed realignment")
 
     #  Will always be given a .sam file processed to only include aligned sequences (--sam-hit-only)
@@ -142,6 +144,7 @@ class UnalignedSeqFinder:
 
         print(f"Results generated at: HGT/Output/{self.output_file}.txt")
 
+
 class SequenceData:
     def __init__(self, sequence):
         self.sequence = sequence
@@ -158,5 +161,3 @@ finder.process_sam()
 finder.fragment_seq()
 finder.realign_fragments()  # syscall
 finder.recollect_fragments()
-
-#CL:minimap2 -w 25 -ax map-hifi ../../../mnt/c/Users/sdouglass/Desktop/Research_Projects/Anne Metagenomics/all_complete_Gb_bac_MINUS_Corynebacterium_jeikeium_PLUS_OTHERS.fasta.gz ../../../mnt/c/Users/sdouglass/Desktop/Research_Projects/Metagenomics_Simulation/Raw_Data/PB644_EB813.hifi_reads.fasta.gz

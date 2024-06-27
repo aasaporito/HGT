@@ -1,0 +1,17 @@
+[file-paths]
+input-sam = ""
+output-name = ""
+
+[settings]
+min-matched-frags = 10 #
+frags-per-seq = 10
+
+
+[minimap2]
+# Do not include filepaths or output redirects.
+# --sam-hit-only and -a (SAM output) is enabled by default and may not be disabled.
+
+# Example:
+# options = "-t 5 -I 1G -K 200M -w 25 -x map-hifi"
+options = ""
+reference-file = ""
