@@ -6,36 +6,24 @@ import pickle
 
 
 class SamFilter:
-    def __init__(self, input_sam, ref_fasta, output_fasta):
+    def __init__(self, input_filter, ref_fasta, output_fasta):
         self.write_buffer = []
         self.relevant_genomes = set()
         self.reference_fasta = ref_fasta
         self.output_sam = output_fasta
-        self.input_sam = input_sam
-
-        # self.relevant_genomes = pickle.load(open("samfilt.pkl", 'rb'))
-        # pprint.pprint(self.relevant_genomes)
+        self.input_text_filter = input_filter
 
     def extract_relevant_genomes(self):
-        with tqdm.tqdm(total=os.path.getsize(self.input_sam)) as pbar:
-            with open(self.input_sam, "r") as infile:
+        with tqdm.tqdm(total=os.path.getsize(self.input_text_filter)) as pbar:
+            with open(self.input_text_filter, "r") as infile:
                 for line in infile:
                     pbar.update(len(line))
                     line = line[:-1]
                     self.relevant_genomes.add(line)
-                    # if line[0] != '@':
-                    #     split_line = line.split('\t')
-                    #     genome = split_line[2]
-                    #
-                    #
-                    #     if genome != '*':
-                    #         self.relevant_genomes.add(genome)
-        print('Created filter set from aligned SAM')
+
+        print('Created filter set.')
         print(f"{len(self.relevant_genomes)} genomes to filter")
-        
-        # with open("samfilt.pkl", "wb") as f:
-        #     pickle.dump(self.relevant_genomes, f)
-        # pprint.pprint(self.relevant_genomes)
+
     def filter_ref_file(self):
         with tqdm.tqdm(total=os.path.getsize(self.reference_fasta)) as pbar:
             with open(self.reference_fasta, "r") as infile:
@@ -69,8 +57,7 @@ class SamFilter:
 
                                 split_line = line[1:-1]
                                 genome = split_line.split(' ')[0]
-                                # print(genome)
-                                # Read char by char until >, treat that as input buffer?
+
                                 if genome in self.relevant_genomes:
                                     pbar.update(pbar_buffer)
                                     pbar_buffer = 0

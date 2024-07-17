@@ -2,8 +2,8 @@ import os
 import tqdm
 import pprint
 
+
 # TODO : USER PARAMRS: step size, start size,
-# TODO : Rerun whole process without 50 50 split
 # TODO : Sequence in output
 # Minimum genome hits to be considered in ref space
 
@@ -15,9 +15,8 @@ class SequenceSplitter:
         self.output_file = self.parent_dir + "/testing/sp2.fasta"
         self.input_file = self.parent_dir + "/testing/" + "813_fresh.sam"
         self.genomes = []
-        # self.splits = [[5, 95], [15, 85], [25, 75], [35, 65], [50, 50], [65, 35], [75, 25], [85, 15], [95, 5]]
 
-        self.splits = SequenceSplitter.generate_splits(5) # TODO : Configure splits
+        self.splits = SequenceSplitter.generate_splits(5)  # TODO : Configure splits
 
         self.output_buf = []
         self.sequences = {}
@@ -36,36 +35,13 @@ class SequenceSplitter:
                         if genome != "*":
                             self.sequences[id] = sequence
                             self.genomes.append(genome + "\n")
-                        # WARN : Only needed for resplicing 50s, should remove
-            #             percents, id = SequenceSplitter.parse_split_index(full_id)
-            #
-            #             if id in self.sequences.keys():
-            #                 if percents[0] == 0:
-            #                     self.sequences[id][1] = sequence
-            #                 else:
-            #                     self.sequences[id][0] = sequence
-            #             else:
-            #                 self.sequences[id] = [None, None]
-            #                 if percents[0] == 0:
-            #                     self.sequences[id][1] = sequence
-            #                 else:
-            #                     self.sequences[id][0] = sequence
-            #
-            # # Remove pairings that are missing a second half # TODO : Why are some missing? 1 half didn't align?
 
-        # pairings = []
-        # count = 0
-        # for id, pairing in self.sequences.items():
-        #     if None not in pairing:
-        #         pairings.append([id, "".join(pairing)])
-
-        # TODO : Bug here prevents high % targets
         with open(f"{self.output_file}", "w") as f:
             for id, sequence in self.sequences.items():
                 j = 0
                 for percents in self.splits:
                     seq_splits = SequenceSplitter.split_string(sequence, percents)
-                    if j < len(self.splits)//2:
+                    if j < len(self.splits) // 2:
                         labels = [f"0-{percents[0]}", f"{100 - percents[1]}-100"]
                     else:
                         labels = [f"{100 - percents[1]}-100", f"0-{percents[0]}"]
@@ -78,10 +54,22 @@ class SequenceSplitter:
         with open(f"{self.parent_dir}/testing/genomes_to_filt.txt", "w") as f:
             f.write("".join(self.genomes))
 
-            # for pair in self.output_buf:
-            #     full_id = pair[0]
-            #     sequence = pair[1]
-            #     f.write(f">{full_id}\n{sequence}\n")
+    @staticmethod
+    def generate_keys(split_step):
+        i = split_step
+        results = []
+        while i <= 50:
+            p1 = f"{0}-{i}"
+            p2 = f"{i}-{100}"
+            p3 = f"{0}-{100 - i}"
+            p4 = f"{100 - i}-{100}"
+            i += split_step
+            results.append(p1)
+            results.append(p2)
+            results.append(p3)
+            results.append(p4)
+
+        return results[:-2]
 
     @staticmethod
     def generate_splits(split_step):
@@ -90,6 +78,7 @@ class SequenceSplitter:
             results.append([i, 100 - i])
 
         return results
+
     @staticmethod
     def parse_split_index(id):
         parts = id.split("/ccs_frag_")
@@ -160,22 +149,13 @@ class SequenceSplitter:
 
         # Sort key options and parse out the best pairing
         # valid_keys = ["0-5", "5-100", "0-15", "15-100", "0-25", "25-100", "0-35", "35-100", "0-50", "50-100"]
-        valid_keys = [
-            "0-5", "5-100", "0-95", "95-100", "0-90", "90-100", "0-10", "10-100", "0-15",
-            "15-100", "0-85", "85-100", "0-20", "20-100", "0-80", "80-100", "0-25", "25-100",
-            "0-75", "75-100", "0-30", "30-100", "0-70", "70-100", "0-35", "35-100", "0-65",
-            "65-100", "0-40", "40-100", "0-60", "60-100", "0-45", "45-100", "0-55", "55-100",
-            "0-50", "50-100"
-        ]
-
-        # Do both (4) at once
-        # What about inconsistency? -> TODO :
+        valid_keys = SequenceSplitter.generate_keys(5) #  TODO : Config settings for this
 
         output_buffer = []
         for identifier in tqdm.tqdm(valid_tables.keys()):
-            for i in range(0, len(valid_keys)-1, 2):
+            for i in range(0, len(valid_keys) - 1, 2):
                 key1 = valid_keys[i]
-                key2 = valid_keys[i+1]
+                key2 = valid_keys[i + 1]
                 try:
                     genomes = [valid_tables[identifier][key1], valid_tables[identifier][key2]]
                     if "*" not in genomes and genomes[0] != genomes[1]:
@@ -193,4 +173,4 @@ class SequenceSplitter:
 
 
 #SequenceSplitter()
-SequenceSplitter.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam") # Use sams with unaligned
+SequenceSplitter.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam")  # Use sams with unaligned
