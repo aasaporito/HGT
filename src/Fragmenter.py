@@ -21,7 +21,7 @@ class FragAnalyzer:
     def realign_fragments(self):
         print("Running minimap2 to realign reads")
         subprocess.run(
-            f"{self.parent_dir}/Tools/minimap2-2.28_x64/minimap2 {self.args_minimap} -a --sam-hit-only "
+            f"{self.parent_dir}/Tools/minimap2-2.28_x64-linux/minimap2 {self.args_minimap} -a --sam-hit-only "
             f"{self.ref_file} {self.temp_dir}/unaligned_seq_frags.fasta > {self.temp_dir}/realigned.sam",
             shell=True)
         print("Completed realignment")
@@ -82,8 +82,8 @@ class FragAnalyzer:
         print(f"Results generated at: HGT/Output/{self.output_file}.txt")
 
 
-class Fragmenter():
-    def __init__(self, output_file="results"):
+class Fragmenter:
+    def __init__(self):
         self.sequence_dict = {}
         self.unaligned_seq_list = []
         self.parent_dir = os.path.dirname(os.getcwd())
@@ -129,9 +129,13 @@ class Fragmenter():
         del self.sequence_dict
         print("Completed SAM Processing")
 
-    def fragment_seq(self):
+    def fragment_seq(self, split_point=False):
+        path = ""
+        if split_point:
+            path = "_sp"
+            self.fragments_per_seq = 2
         print("Slicing unaligned sequences:")
-        with open(f"{self.temp_dir}/unaligned_seq_frags.fasta", "w") as outfile:
+        with open(f"{self.temp_dir}/unaligned_seq_frags{path}.fasta", "w") as outfile:
             for sequence_name, sequence in tqdm.tqdm(self.unaligned_seq_list):
                 frag_len = len(sequence) // self.fragments_per_seq
 
@@ -139,7 +143,13 @@ class Fragmenter():
                     start_idx = i * frag_len
                     end_idx = start_idx + frag_len if i != self.fragments_per_seq - 1 else len(sequence)
 
-                    outfile.write(f">{sequence_name}_frag_{i + 1}\n")
+                    if split_point:
+                        start_percent = 0 if i == 0 else i / self.fragments_per_seq * 100
+                        end_percent = 100 if i == self.fragments_per_seq - 1 else (i + 1) / self.fragments_per_seq * 100
+                        label = str(start_percent) + "-" + str(end_percent)
+                    else:
+                        label = i + 1
+                    outfile.write(f">{sequence_name}_frag_{label}\n")
                     outfile.write(f"{sequence[start_idx:end_idx]}\n")
 
         del self.unaligned_seq_list
@@ -159,6 +169,7 @@ class SequenceData:
         return f"({self.sequence}, {self.genomes}, {self.fragments}, {self.pairs})"
 
 
+# Standard run of X chunks fragmenter version.
 finder = Fragmenter()
 finder.find_unaligned_seqs()
 finder.fragment_seq()
@@ -167,4 +178,3 @@ del finder
 fragAnalyzer = FragAnalyzer()
 fragAnalyzer.realign_fragments()
 fragAnalyzer.recollect_fragments()
-
