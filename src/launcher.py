@@ -1,6 +1,7 @@
 import argparse
 from FragAnalyzer import FragAnalyzer
 from Fragmenter import Fragmenter
+from RollingWindow import RollingWindow
 
 
 def setup_parser():
@@ -50,14 +51,18 @@ def rolling_window_launcher(args):
     print("Roll Launch")
     window_step = args.window
     result_mode = args.results is True
+    input_file = args.input
 
     if result_mode:
         print("Launch result processor")
+        rolling_window = RollingWindow(input_file, window_step)
+        rolling_window.parse_results(input_file)
     else:
         print("Launch window slice creator for alignment")
-    pass
+        window = RollingWindow(input_file, window_step)
+        window.generate_rolling_splits()
 
-    pass
+
 
 
 args = setup_parser()

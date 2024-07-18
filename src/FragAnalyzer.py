@@ -8,7 +8,7 @@ class FragAnalyzer:
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
-        self.output_file = "results"
+        self.output_file = "Fragment_Results"
         self.min_matched_frags = min_frags
         self.realigned_seqs = {}
 

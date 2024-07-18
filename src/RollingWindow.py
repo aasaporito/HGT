@@ -7,20 +7,21 @@ import pprint
 # TODO : Sequence in output
 # Minimum genome hits to be considered in ref space
 
-class SequenceSplitter:
-    def __init__(self):
+class RollingWindow:
+    def __init__(self, input_file, step_size):
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.realigned_seqs = {}
-        self.output_file = self.parent_dir + "/testing/sp2.fasta"
-        self.input_file = self.parent_dir + "/testing/" + "813_fresh.sam"
         self.genomes = []
-
-        self.splits = SequenceSplitter.generate_splits(5)  # TODO : Configure splits
-
         self.output_buf = []
         self.sequences = {}
 
+        self.tmp_file = self.parent_dir + "/tmp/rolling_window.fasta"
+        self.input_file = input_file
+        self.step_size = step_size
+        self.splits = RollingWindow.generate_splits(self.step_size)
+
+    def generate_rolling_splits(self):
         with tqdm.tqdm(total=os.path.getsize(f"{self.input_file}")) as pbar:
             with open(self.input_file, "r") as f:
                 for line in f:
@@ -36,11 +37,11 @@ class SequenceSplitter:
                             self.sequences[id] = sequence
                             self.genomes.append(genome + "\n")
 
-        with open(f"{self.output_file}", "w") as f:
+        with open(f"{self.tmp_file}", "w") as f:
             for id, sequence in self.sequences.items():
                 j = 0
                 for percents in self.splits:
-                    seq_splits = SequenceSplitter.split_string(sequence, percents)
+                    seq_splits = RollingWindow.split_string(sequence, percents)
                     if j < len(self.splits) // 2:
                         labels = [f"0-{percents[0]}", f"{100 - percents[1]}-100"]
                     else:
@@ -51,8 +52,10 @@ class SequenceSplitter:
                     for i in range(len(full_ids)):
                         f.write(f">{full_ids[i]}\n{seq_splits[i]}\n")
 
-        with open(f"{self.parent_dir}/testing/genomes_to_filt.txt", "w") as f:
+        print(f"Generated splits for realignment at: /tmp/{self.tmp_file}")
+        with open(f"{self.parent_dir}/tmp/genomes_to_filter.txt", "w") as f:
             f.write("".join(self.genomes))
+        print(f"Generated filter file to reduce reference genome at /tmp/genomes_to_filter.txt")
 
     @staticmethod
     def generate_keys(split_step):
@@ -105,8 +108,7 @@ class SequenceSplitter:
 
         return chunks
 
-    @staticmethod
-    def parse_results(sam_file):
+    def parse_results(self, sam_file):
         identifiers = {}
         genomes = {}
         split_tables = {}  # dict[identifier] = subdict[percentage as key] = genome
@@ -149,7 +151,7 @@ class SequenceSplitter:
 
         # Sort key options and parse out the best pairing
         # valid_keys = ["0-5", "5-100", "0-15", "15-100", "0-25", "25-100", "0-35", "35-100", "0-50", "50-100"]
-        valid_keys = SequenceSplitter.generate_keys(5) #  TODO : Config settings for this
+        valid_keys = RollingWindow.generate_keys(self.step_size)
 
         output_buffer = []
         for identifier in tqdm.tqdm(valid_tables.keys()):
@@ -168,9 +170,9 @@ class SequenceSplitter:
                     pprint.pprint(valid_tables[identifier])
                     pass
 
-        with open(os.path.dirname(os.getcwd()) + "/testing/split_point_results.txt", "w") as f:
+        with open(os.path.dirname(os.getcwd()) + "/Output/Rolling_Window_Results.txt", "w") as f:
             f.write("\n".join(output_buffer))
-
+        print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results.txt")
 
 #SequenceSplitter()
-SequenceSplitter.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam")  # Use sams with unaligned
+# RollingWindow.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam")  # Use sams with unaligned
