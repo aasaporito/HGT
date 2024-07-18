@@ -1,16 +1,21 @@
 import argparse
+from FragAnalyzer import FragAnalyzer
+from Fragmenter import Fragmenter
 
 
 def setup_parser():
     parser = argparse.ArgumentParser(description='Horizontal Gene Transfer Launcher')
-    parser.add_argument("--results", help="Result processing mode", action='store_true')
 
     mut_group = parser.add_mutually_exclusive_group(required=True)
     mut_group.add_argument("-f", "--frag", help="Fragmenting mode", action="store_true")
     mut_group.add_argument("-r", "--rolling", help="Rolling Window mode", action="store_true")
 
+    parser.add_argument("--results", help="Result processing mode", action='store_true')
+    parser.add_argument("-i", "--input", help="Input file. Either initial sam file or results to process (with --results)",
+                        required=True)
+
     group = parser.add_argument_group('Fragmenting Options')
-    group.add_argument("-s", "--size", help="Size of chunks for fragmenting mode [default: 10 percent]", type=int,
+    group.add_argument("-s", "--size", help="Fragments per sequence [default: 10]", type=int,
                        default=10, action="store")
     group.add_argument("-m", "--min-frags", help="Minimum matched fragments for candidacy [default: Equal to -s]", type=int, default=None, action="store")
 
@@ -27,11 +32,17 @@ def fragment_launcher(args):
     frag_size = args.size
     min_frags = args.min_frags
     result_mode = args.results is True
+    input_file = args.input
 
     if result_mode:
         print("Launch result processor")
+        frag_analyzer = FragAnalyzer(input_file, min_frags)
+        frag_analyzer.recollect_fragments()
     else:
         print("Launch fragment creator for alignment")
+        frag = Fragmenter(input_file, frag_size, min_frags)
+        frag.find_unaligned_seqs()
+        frag.fragment_seq()
     pass
 
 

@@ -62,8 +62,6 @@ class SamFilter:
                                     pbar.update(pbar_buffer)
                                     pbar_buffer = 0
 
-                                    # print("Adding to relevant genomes!")
-                                    # print(genome)
                                     write_out = line[:-1]
                                     if write_out[-1] != "\n":
                                         write_out += "\n"
@@ -72,11 +70,12 @@ class SamFilter:
                             else:
                                 write_out = line
                                 print(write_out)
-                                print("Head up!")
+                                print("Error at above line, skipping.")
 
                             if len(self.write_buffer) > 100:
                                 outfile.write("".join(self.write_buffer))
                                 self.write_buffer = []
+
                     if len(self.write_buffer) > 0:
                         outfile.write("".join(self.write_buffer))
                         self.write_buffer = []
