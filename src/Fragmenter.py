@@ -61,7 +61,7 @@ class Fragmenter:
 
         del self.unaligned_seq_list
         print("Completed Fragment Sequence Processing")
-        print(f"Fasta for alignment generated at: {self.temp_dir}/unaligned_seq_frags.fasta")
+        print(f"Fasta for alignment generated at: {self.temp_dir}/fragments.fasta")
 
     #  Will always be given a .sam file processed to only include aligned sequences (--sam-hit-only)
 
