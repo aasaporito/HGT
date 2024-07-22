@@ -1,14 +1,16 @@
 import os
 import tqdm
+import datetime
 from SequenceData import SequenceData
 
 
 class FragAnalyzer:
     def __init__(self, input_file, min_frags):
+        identifier = str(datetime.datetime.now())[:-5]
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
-        self.output_file = "Fragment_Results"
+        self.output_file = f"Fragment_Results_{identifier}"
         self.min_matched_frags = min_frags
         self.realigned_seqs = {}
 
