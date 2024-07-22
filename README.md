@@ -109,27 +109,21 @@ To get a local copy up and running follow these simple example steps.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
+### Fragmenting Mode Example:
+1. From the HGT directory, generate sequences at a rate of 10 per sequence:
+      ```sh
+    ./run.sh --frag --size 10 --min-frags 10 --input <input_file.sam>
+      ```
+2. Fragmented output for realignment can be found at HGT/tmp/fragments.fasta
+3. Run aligner of choice on fragments.fasta.
+4. Call output processor on the re-aligned sequences.
+    ```sh
+   ./run.sh --frag --size 10 --min-frags 10 --input <re-aligned.sam> --results
+   ```
+5. Results will be generated at HGT/Output/Fragment_Results_id.txt
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/aasaporito/HGT/issues) for a full list of proposed features (and known issues).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- CONTRIBUTING -->
@@ -153,30 +147,24 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
-
+Distributed under the Mozilla Public License Version 2.0 License. See `LICENSE.txt` for more information.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
 <!-- CONTACT -->
 ## Contact
-
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
+##### Author: 
+Aaron Saporito - [LinkedIn](https://www.linkedin.com/in/aaron-saporito) - [GitHub](https://github.com/aasaporito)
 
 Project Link: [https://github.com/aasaporito/HGT](https://github.com/aasaporito/HGT)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-
-* []()
-* []()
-* []()
-
+* <a href="https://www.conncoll.edu/directories/faculty-profiles/stephen-douglass/"> Dr. Stephen Douglass </a>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
