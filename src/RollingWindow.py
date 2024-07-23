@@ -1,7 +1,7 @@
 import os
 import tqdm
 import pprint
-
+import datetime
 
 # TODO : USER PARAMRS: step size, start size,
 # TODO : Sequence in output
@@ -170,7 +170,7 @@ class RollingWindow:
                     pprint.pprint(valid_tables[identifier])
                     pass
 
-        with open(os.path.dirname(os.getcwd()) + "/Output/Rolling_Window_Results.txt", "w") as f:
+        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{str(datetime.datetime.now())[:-5]}.txt", "w") as f:
             f.write("\n".join(output_buffer))
         print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results.txt")
 
