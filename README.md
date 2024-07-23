@@ -58,7 +58,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Here's a blank template to get started: To avoid retyping too much info. Do a search and replace with your text editor for the following: `project_description`
+`project_description`
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
