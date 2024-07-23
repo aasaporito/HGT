@@ -22,7 +22,6 @@
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
-
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
@@ -125,6 +124,19 @@ To get a local copy up and running follow these simple example steps.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+
+<!-- Parameters -->
+### Parameters
+| Argument       | Function                                                                                                                                                           | Default                     | Requirements                      |
+|----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|:----------------------------|-----------------------------------|
+| `-h, --help`   | Displays arguments and usage                                                                                                                                       | <center>--</center>         | <center>--</center>               |
+| `-f, --frag`   | Indicates that you want to run the program in fragmenting mode.  Default: off.                                                                                     | <center>--</center>         | Must be specified or -r/--rolling |
+| `-r, --rolling` | Indicates that you want to run the program in rolling window mode.  Default: off.                                                                                  | <center>--</center>         | Must be specified or -f/--frag    |
+| `-i, --input`  | Your input aligned .sam file with path. Applies to both initial runs and result processing mode.                                                                   | <center>--</center>         | Mandatory                         |
+| `--results`    | Indicates to run the result processor for the specified .sam file and parameters. Generally should be called in addition to all original arguements during step 1. | <center>---</center>        | <center>---</center>              |
+| `-s, --size`   | Specifies the amount of fragments to create per sequence.                                                                                                          | <center> 10 fragments       | <center>-f/--frag                 |
+| `-m, --min-frags` | Specifies the amount of fragments that must be aligned to qualify for horizontal gene transfer candidacy. Must be <= -s/--size. <br/> *In fragmenting mode --min-frags can be changed at result processing time.                                   | <center> Equal to -s/--size | <center> -f/--frag                |
+| `-w, --window` | Specifies the window step size for rolling mode.                                                                                                                   | <center> 10%                | <center> -r/--rolling             |
 
 <!-- CONTRIBUTING -->
 ## Contributing
