@@ -101,6 +101,10 @@ Here's a blank template to get started: To avoid retyping too much info. Do a se
    ./run.sh --frag --size 10 --min-frags 10 --input <re-aligned.sam> --results
    ```
 5. Results will be generated at HGT/Output/Fragment_Results_id.txt
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+
+
 
 <a id="roll_ex"></a>
 ### Rolling Window Mode Example:
