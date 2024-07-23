@@ -170,9 +170,10 @@ class RollingWindow:
                     pprint.pprint(valid_tables[identifier])
                     pass
 
-        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{str(datetime.datetime.now())[:-5]}.txt", "w") as f:
+        id = str(datetime.datetime.now())[:-5]
+        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{id}.txt", "w") as f:
             f.write("\n".join(output_buffer))
-        print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results.txt")
+        print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results_{id}.txt")
 
 #SequenceSplitter()
 # RollingWindow.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam")  # Use sams with unaligned
