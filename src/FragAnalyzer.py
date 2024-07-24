@@ -6,7 +6,7 @@ from SequenceData import SequenceData
 
 class FragAnalyzer:
     def __init__(self, input_file, min_frags):
-        identifier = str(datetime.datetime.now())[:-5]
+        identifier = "".join(str(datetime.datetime.now())[:-5].split(":"))
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
@@ -51,6 +51,7 @@ class FragAnalyzer:
                             else:
                                 continue
                         else:
+                            # alignment_score = -1
                             self.realigned_seqs[seq_name] = [genome, alignment_score]
 
         seq_dict = {}

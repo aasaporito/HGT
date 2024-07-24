@@ -170,7 +170,7 @@ class RollingWindow:
                     pprint.pprint(valid_tables[identifier])
                     pass
 
-        id = str(datetime.datetime.now())[:-5]
+        id = "".join(str(datetime.datetime.now())[:-5].split(":"))
         with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{id}.txt", "w") as f:
             f.write("\n".join(output_buffer))
         print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results_{id}.txt")
