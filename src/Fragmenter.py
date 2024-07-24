@@ -47,7 +47,7 @@ class Fragmenter:
 
     def fragment_seq(self):
         print("Slicing unaligned sequences:")
-        with open(f"{self.temp_dir}/unaligned_seq_frags.fasta", "w") as outfile:
+        with open(f"{self.temp_dir}/fragments.fasta", "w") as outfile:
             for sequence_name, sequence in tqdm.tqdm(self.unaligned_seq_list):
                 frag_len = len(sequence) // self.fragments_per_seq
 
