@@ -1,5 +1,6 @@
 import os
 import tqdm
+import gzip
 
 
 class Fragmenter:
@@ -14,26 +15,48 @@ class Fragmenter:
 
     def find_unaligned_seqs(self):
         print("Processing SAM input:")
+        if self.sam_file.endswith(".sam"):
+            with tqdm.tqdm(total=os.path.getsize(self.sam_file)) as pbar:
+                with open(self.sam_file, "r") as infile:
+                    for line in infile:
+                        pbar.update(len(line))
+                        if line[0] != '@':
+                            line = line.split('\t')
+                            sequence_name = line[0]
+                            is_aligned = (line[2] != '*')
+                            sequence = line[9]
 
-        with tqdm.tqdm(total=os.path.getsize(self.sam_file)) as pbar:
-            with open(self.sam_file, "r") as infile:
-                for line in infile:
-                    pbar.update(len(line))
-                    if line[0] != '@':
-                        line = line.split('\t')
-                        sequence_name = line[0]
-                        is_aligned = (line[2] != '*')
-                        sequence = line[9]
+                            if sequence_name in self.sequence_dict:
+                                self.sequence_dict[sequence_name] = [(is_aligned and self.sequence_dict[sequence_name]),
+                                                                     sequence, sequence_name]
+                                # If sequence is aligned we don't need to store its sequence.
+                                if self.sequence_dict[sequence_name][0]:
+                                    self.sequence_dict[sequence_name][1] = None
 
-                        if sequence_name in self.sequence_dict:
-                            self.sequence_dict[sequence_name] = [(is_aligned and self.sequence_dict[sequence_name]),
-                                                                 sequence, sequence_name]
-                            # If sequence is aligned we don't need to store its sequence.
-                            if self.sequence_dict[sequence_name][0]:
-                                self.sequence_dict[sequence_name][1] = None
+                            else:
+                                self.sequence_dict[sequence_name] = [is_aligned, sequence, sequence_name]
+        elif self.sam_file.endswith(".gz"): # TODO REWRITE cleaner
+            with tqdm.tqdm(total=os.path.getsize(self.sam_file)) as pbar:
+                with gzip.open(self.sam_file, "r") as infile:
+                    for line in infile:
+                        line = line.decode()
+                        pbar.update(len(line))
 
-                        else:
-                            self.sequence_dict[sequence_name] = [is_aligned, sequence, sequence_name]
+                        if line[0] != '@':
+                            line = line.split('\t')
+                            sequence_name = line[0]
+                            is_aligned = (line[2] != '*')
+                            sequence = line[9]
+
+                            if sequence_name in self.sequence_dict:
+                                self.sequence_dict[sequence_name] = [(is_aligned and self.sequence_dict[sequence_name]),
+                                                                     sequence, sequence_name]
+                                # If sequence is aligned we don't need to store its sequence.
+                                if self.sequence_dict[sequence_name][0]:
+                                    self.sequence_dict[sequence_name][1] = None
+
+                            else:
+                                self.sequence_dict[sequence_name] = [is_aligned, sequence, sequence_name]
 
         for sequence in self.sequence_dict.values():
             is_aligned = sequence[0]
@@ -70,10 +93,10 @@ class Fragmenter:
 
 
 # Standard run of X chunks fragmenter version.
-# finder = Fragmenter()
-# finder.find_unaligned_seqs()
-# finder.fragment_seq()
-# del finder
+finder = Fragmenter("/media/aaron/T9/HGT/SRR11606871.sam.gz", 10, 10)
+finder.find_unaligned_seqs()
+finder.fragment_seq()
+del finder
 #
 # fragAnalyzer = FragAnalyzer()
 # fragAnalyzer.realign_fragments()
