@@ -97,10 +97,10 @@ class Fragmenter:
 
 
 # Standard run of X chunks fragmenter version.
-finder = Fragmenter("/media/aaron/T91/splits/part_0.sam", 10, 10)
-finder.find_unaligned_seqs()
-finder.fragment_seq()
-del finder
+# finder = Fragmenter("/media/aaron/T91/splits/part_0.sam", 10, 10)
+# finder.find_unaligned_seqs()
+# finder.fragment_seq()
+# del finder
 #
 # fragAnalyzer = FragAnalyzer()
 # fragAnalyzer.realign_fragments()
