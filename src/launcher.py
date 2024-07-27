@@ -29,18 +29,17 @@ def setup_parser():
 
 
 def fragment_launcher(args):
-    print("Frag Launch")
     frag_size = args.size
     min_frags = args.min_frags
     result_mode = args.results is True
     input_file = args.input
 
     if result_mode:
-        print("Launch result processor")
+        print("Launching result processor")
         frag_analyzer = FragAnalyzer(input_file, min_frags)
         frag_analyzer.recollect_fragments()
     else:
-        print("Launch fragment creator for alignment")
+        print("Launching fragment creator for alignment")
         frag = Fragmenter(input_file, frag_size, min_frags)
         frag.find_unaligned_seqs()
         frag.fragment_seq()
@@ -48,13 +47,12 @@ def fragment_launcher(args):
 
 
 def rolling_window_launcher(args):
-    print("Roll Launch")
     window_step = args.window
     result_mode = args.results is True
     input_file = args.input
 
     if result_mode:
-        print("Launch result processor")
+        print("Launching result processor")
         rolling_window = RollingWindow(input_file, window_step)
         rolling_window.parse_results(input_file)
     else:
