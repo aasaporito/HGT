@@ -13,12 +13,13 @@ class RollingWindow:
         self.genomes = []
         self.output_buf = []
         self.sequences = {}
+
         if output_file:
             self.output_file = f"Window_Results_{output_file}"
         else:
+            print(id)
             self.output_file = f"Window_results_{id}"
 
-        self.output_file = output_file
         self.tmp_file = self.parent_dir + "/tmp/rolling_window.fasta"
         self.input_file = input_file
         self.step_size = step_size

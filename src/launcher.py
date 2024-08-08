@@ -12,7 +12,7 @@ def setup_parser():
     mut_group.add_argument("-r", "--rolling", help="Rolling Window mode", action="store_true")
 
     parser.add_argument("--results", help="Result processing mode", action='store_true')
-    parser.add_argument("-o", "--output", help="Output file name", default=None)
+    parser.add_argument("-o", "--output", help="Output file name", action='store')
     parser.add_argument("-i", "--input",
                         help="Input file. Either initial sam file or results to process (with --results)",
                         required=True)
