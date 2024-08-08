@@ -4,13 +4,20 @@ import datetime
 from SequenceData import SequenceData
 
 
+def get_fragment_number(record):
+    return int(record[0].split('_')[-1])
+
+
 class FragAnalyzer:
-    def __init__(self, input_file, min_frags):
+    def __init__(self, input_file, min_frags, output_file):
         identifier = "".join(str(datetime.datetime.now())[:-5].split(":"))
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
-        self.output_file = f"Fragment_Results_{identifier}"
+        if output_file:
+            self.output_file = f"fragment_results_{output_file}"
+        else:
+            self.output_file = f"Fragment_Results_{identifier}"
         self.min_matched_frags = min_frags
         self.realigned_seqs = {}
 
@@ -41,7 +48,9 @@ class FragAnalyzer:
                         try:
                             alignment_score = int(line[13][5:])
                         except Exception as e:
-                            print("Error processing alignment score for: " + genome)
+                            # print("Error processing alignment score for: " + genome)
+                            # print(line)
+                            alignment_score = -1
 
                         if seq_name in self.realigned_seqs.keys():
                             old_score = self.realigned_seqs[seq_name][1]
@@ -56,7 +65,7 @@ class FragAnalyzer:
 
         seq_dict = {}
         for frag_name, entry in self.realigned_seqs.items():
-            seq_name = frag_name.split("/ccs_frag_")[0]
+            seq_name = frag_name.split("_frag_")[0]
             genome = self.realigned_seqs[frag_name][0]
             alignment_score = self.realigned_seqs[frag_name][1]
             if seq_name not in seq_dict.keys():
@@ -76,7 +85,7 @@ class FragAnalyzer:
             if genome_count < 2 or frag_count < self.min_matched_frags:
                 continue
 
-            for pair in sorted(entry.pairs, key=lambda pair: pair[1]):
+            for pair in sorted(entry.pairs, key=get_fragment_number):  # TODO Test this
                 output_str = f"{pair[0]}\t{pair[1]}\tAS:i:{str(pair[2])}\n"
                 output += output_str
             output += "\n"
@@ -85,3 +94,5 @@ class FragAnalyzer:
             f.write(output)
 
         print(f"Results generated at: HGT/Output/{self.output_file}.txt")
+
+

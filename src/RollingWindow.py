@@ -1,14 +1,10 @@
 import os
 import tqdm
-import pprint
 import datetime
 
-# TODO : USER PARAMRS: step size, start size,
-# TODO : Sequence in output
-# Minimum genome hits to be considered in ref space
 
 class RollingWindow:
-    def __init__(self, input_file, step_size):
+    def __init__(self, input_file, step_size, output_file=""):
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.realigned_seqs = {}
@@ -16,28 +12,14 @@ class RollingWindow:
         self.output_buf = []
         self.sequences = {}
 
+        self.output_file = output_file
         self.tmp_file = self.parent_dir + "/tmp/rolling_window.fasta"
         self.input_file = input_file
         self.step_size = step_size
         self.splits = RollingWindow.generate_splits(self.step_size)
 
-    def generate_rolling_splits(self):
-        with tqdm.tqdm(total=os.path.getsize(f"{self.input_file}")) as pbar:
-            with open(self.input_file, "r") as f:
-                for line in f:
-                    pbar.update(len(line))
-                    if not line.startswith('@'):
-                        fields = line.split("\t")
-                        full_id = fields[0]
-                        sequence = fields[9]
-                        genome = fields[2]
-
-                        id = full_id.split("/ccs")[0]
-                        if genome != "*":
-                            self.sequences[id] = sequence
-                            self.genomes.append(genome + "\n")
-
-        with open(f"{self.tmp_file}", "w") as f:
+    def write_splits(self):
+        with open(f"{self.tmp_file}", "a") as f:
             for id, sequence in self.sequences.items():
                 j = 0
                 for percents in self.splits:
@@ -52,7 +34,34 @@ class RollingWindow:
                     for i in range(len(full_ids)):
                         f.write(f">{full_ids[i]}\n{seq_splits[i]}\n")
 
-        print(f"Generated splits for realignment at: /tmp/{self.tmp_file}")
+    def generate_rolling_splits(self):
+        with open(self.tmp_file, "w") as f:
+            pass
+        with tqdm.tqdm(total=os.path.getsize(f"{self.input_file}")) as pbar:
+            with open(self.input_file, "r") as f:
+                for line in f:
+                    pbar.update(len(line))
+                    if not line.startswith('@'):
+                        fields = line.split("\t")
+                        full_id = fields[0]
+                        sequence = fields[9]
+                        genome = fields[2]
+
+                        id = full_id  #  full_id.split("/ccs")[0]
+                        if genome == "*" and sequence != '*':  # TODO : Reexamine this, why was it set to only when known genome?
+                            self.sequences[id] = sequence
+                            self.genomes.append(genome + "\n")
+
+                    if len(self.sequences) > 50_000:
+                        print("Writing splits to file.")
+                        self.write_splits()
+                        self.sequences = {}
+
+                if len(self.sequences) > 0:
+                    self.write_splits()
+                    self.sequences = {}
+
+        print(f"Generated splits for realignment at: {self.tmp_file}")
         with open(f"{self.parent_dir}/tmp/genomes_to_filter.txt", "w") as f:
             f.write("".join(self.genomes))
         print(f"Generated filter file to reduce reference genome at /tmp/genomes_to_filter.txt")
@@ -84,7 +93,7 @@ class RollingWindow:
 
     @staticmethod
     def parse_split_index(id):
-        parts = id.split("/ccs_frag_")
+        parts = id.split("/_percents_")
         percents = [int(float(i)) for i in parts[1].split("-")]
         return percents, parts[0]
 
@@ -145,7 +154,7 @@ class RollingWindow:
                 except:
                     pass
 
-                if star_count < 5 and len(known_genomes) >= 2:
+                if star_count < 5 and len(known_genomes) >= 2:  # TODO : Star count is dependent on %'s
                     valid_tables[key] = subdict
                     continue
 
@@ -166,14 +175,15 @@ class RollingWindow:
                         output_buffer.append(key2 + "%\t" + genomes[1] + "\n")
                         break
                 except Exception as e:
-                    print(e)
-                    pprint.pprint(valid_tables[identifier])
+                    # print(e)
+                    # pprint.pprint(valid_tables[identifier])
                     pass
 
         id = "".join(str(datetime.datetime.now())[:-5].split(":"))
-        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{id}.txt", "w") as f:
+        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{id}_{self.output_file}.txt",
+                  "w") as f:
             f.write("\n".join(output_buffer))
-        print(f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results_{id}.txt")
+        print(
+            f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results_{id}_{self.output_file}.txt")
 
-#SequenceSplitter()
-# RollingWindow.parse_results(os.path.dirname(os.getcwd()) + "/testing/813_fresh.sam")  # Use sams with unaligned
+

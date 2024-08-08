@@ -12,6 +12,7 @@ def setup_parser():
     mut_group.add_argument("-r", "--rolling", help="Rolling Window mode", action="store_true")
 
     parser.add_argument("--results", help="Result processing mode", action='store_true')
+    parser.add_argument("-o", "--output", help="Output file name", default=None)
     parser.add_argument("-i", "--input", help="Input file. Either initial sam file or results to process (with --results)",
                         required=True)
 
@@ -33,13 +34,14 @@ def fragment_launcher(args):
     min_frags = args.min_frags
     result_mode = args.results is True
     input_file = args.input
+    output_file = args.output
 
     if result_mode:
         print("Launching result processor")
-        frag_analyzer = FragAnalyzer(input_file, min_frags)
+        frag_analyzer = FragAnalyzer(input_file, min_frags, output_file)
         frag_analyzer.recollect_fragments()
     else:
-        print("Launching fragment creator for alignment")
+        print("Launching fragment slicer")
         frag = Fragmenter(input_file, frag_size, min_frags)
         frag.find_unaligned_seqs()
         frag.fragment_seq()
@@ -50,14 +52,15 @@ def rolling_window_launcher(args):
     window_step = args.window
     result_mode = args.results is True
     input_file = args.input
+    output_file = args.output
 
     if result_mode:
         print("Launching result processor")
-        rolling_window = RollingWindow(input_file, window_step)
+        rolling_window = RollingWindow(input_file, window_step, output_file)
         rolling_window.parse_results(input_file)
     else:
-        print("Launch window slice creator for alignment")
-        window = RollingWindow(input_file, window_step)
+        print("Launch window slicer")
+        window = RollingWindow(input_file, window_step, output_file)
         window.generate_rolling_splits()
 
 
