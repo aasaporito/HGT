@@ -15,22 +15,12 @@ class FragAnalyzer:
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
         if output_file:
-            self.output_file = f"fragment_results_{output_file}"
+            self.output_file = f"Fragment_Results_{output_file}"
         else:
             self.output_file = f"Fragment_Results_{identifier}"
         self.min_matched_frags = min_frags
         self.realigned_seqs = {}
 
-        # self.ref_file = toml["minimap2"]["reference-file"]
-        # self.args_minimap = toml["minimap2"]["options"]
-
-    # def realign_fragments(self):
-    #     print("Running minimap2 to realign reads")
-    #     subprocess.run(
-    #         f"{self.parent_dir}/Tools/minimap2-2.28_x64-linux/minimap2 {self.args_minimap} -a --sam-hit-only "
-    #         f"{self.ref_file} {self.temp_dir}/unaligned_seq_frags.fasta > {self.temp_dir}/realigned.sam",
-    #         shell=True)
-    #     print("Completed realignment")
 
     def recollect_fragments(self):
         print("Analyzing realigned fragments")
@@ -85,7 +75,7 @@ class FragAnalyzer:
             if genome_count < 2 or frag_count < self.min_matched_frags:
                 continue
 
-            for pair in sorted(entry.pairs, key=get_fragment_number):  # TODO Test this
+            for pair in sorted(entry.pairs, key=get_fragment_number):
                 output_str = f"{pair[0]}\t{pair[1]}\tAS:i:{str(pair[2])}\n"
                 output += output_str
             output += "\n"

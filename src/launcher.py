@@ -13,13 +13,15 @@ def setup_parser():
 
     parser.add_argument("--results", help="Result processing mode", action='store_true')
     parser.add_argument("-o", "--output", help="Output file name", default=None)
-    parser.add_argument("-i", "--input", help="Input file. Either initial sam file or results to process (with --results)",
+    parser.add_argument("-i", "--input",
+                        help="Input file. Either initial sam file or results to process (with --results)",
                         required=True)
 
     group = parser.add_argument_group('Fragmenting Options')
     group.add_argument("-s", "--size", help="Fragments per sequence [default: 10]", type=int,
                        default=10, action="store")
-    group.add_argument("-m", "--min-frags", help="Minimum matched fragments for candidacy [default: Equal to -s]", type=int, default=None, action="store")
+    group.add_argument("-m", "--min-frags", help="Minimum matched fragments for candidacy [default: Equal to -s]",
+                       type=int, default=None, action="store")
 
     group = parser.add_argument_group('Rolling Window Options')
     group.add_argument("-w", "--window", help="Window step size [default: 10 percent]", type=int, default=10,
@@ -62,8 +64,6 @@ def rolling_window_launcher(args):
         print("Launch window slicer")
         window = RollingWindow(input_file, window_step, output_file)
         window.generate_rolling_splits()
-
-
 
 
 args = setup_parser()

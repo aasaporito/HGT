@@ -4,13 +4,19 @@ import datetime
 
 
 class RollingWindow:
-    def __init__(self, input_file, step_size, output_file=""):
+    def __init__(self, input_file, step_size, output_file):
+        id = "".join(str(datetime.datetime.now())[:-5].split(":"))
+
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.realigned_seqs = {}
         self.genomes = []
         self.output_buf = []
         self.sequences = {}
+        if output_file:
+            self.output_file = f"Window_Results_{output_file}"
+        else:
+            self.output_file = f"Window_results_{id}"
 
         self.output_file = output_file
         self.tmp_file = self.parent_dir + "/tmp/rolling_window.fasta"
@@ -179,11 +185,10 @@ class RollingWindow:
                     # pprint.pprint(valid_tables[identifier])
                     pass
 
-        id = "".join(str(datetime.datetime.now())[:-5].split(":"))
-        with open(os.path.dirname(os.getcwd()) + f"/Output/Rolling_Window_Results_{id}_{self.output_file}.txt",
+        with open(os.path.dirname(os.getcwd()) + f"/Output/{self.output_file}.txt",
                   "w") as f:
             f.write("\n".join(output_buffer))
         print(
-            f"Output Generated at {os.path.dirname(os.getcwd())}/Output/Rolling_Window_Results_{id}_{self.output_file}.txt")
+            f"Output Generated at ./Output/{self.output_file}.txt")
 
 
