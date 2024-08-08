@@ -4,23 +4,43 @@ import datetime
 from SequenceData import SequenceData
 
 
-def get_fragment_number(record):
-    return int(record[0].split('_')[-1])
+
+
 
 
 class FragAnalyzer:
-    def __init__(self, input_file, min_frags, output_file):
+    def __init__(self, input_file, frag_size, min_frags, output_file, post_proc):
         identifier = "".join(str(datetime.datetime.now())[:-5].split(":"))
         self.parent_dir = os.path.dirname(os.getcwd())
         self.temp_dir = os.path.dirname(os.getcwd()) + "/tmp/"
         self.input_file = input_file
+        self.post_proc = post_proc
+
         if output_file:
             self.output_file = f"Fragment_Results_{output_file}"
         else:
             self.output_file = f"Fragment_Results_{identifier}"
         self.min_matched_frags = min_frags
+        self.frag_size = frag_size
         self.realigned_seqs = {}
 
+    @staticmethod
+    def get_fragment_number(record):
+        return int(record[0].split('_')[-1])
+
+    @staticmethod
+    def check_consecutive_references(dataset):
+        # Extract reference sequences
+        references = [line.split("\t")[1] for line in dataset]
+
+        # Check if the references are grouped together without interruptions
+        unique_references = sorted(set(references))
+        for ref in unique_references:
+            indices = [i for i, x in enumerate(references) if x == ref]
+            if indices != list(range(indices[0], indices[-1] + 1)):
+                return False
+
+        return True
 
     def recollect_fragments(self):
         print("Analyzing realigned fragments")
@@ -75,7 +95,7 @@ class FragAnalyzer:
             if genome_count < 2 or frag_count < self.min_matched_frags:
                 continue
 
-            for pair in sorted(entry.pairs, key=get_fragment_number):
+            for pair in sorted(entry.pairs, key=FragAnalyzer.get_fragment_number):
                 output_str = f"{pair[0]}\t{pair[1]}\tAS:i:{str(pair[2])}\n"
                 output += output_str
             output += "\n"
@@ -84,5 +104,43 @@ class FragAnalyzer:
             f.write(output)
 
         print(f"Results generated at: HGT/Output/{self.output_file}.txt")
+
+        if self.post_proc:
+            self.post_process()
+            print(f"Completed post processing @ {self.parent_dir}/Output/Post_Proc_{self.output_file}.txt")
+
+    def post_process(self):
+        def read_file():
+            with (open(f"{self.parent_dir}/Output/{self.output_file}.txt", "r") as f):
+                valid_res = []
+                while True:
+                    entry = []
+                    genomes = set()
+                    for i in range(self.frag_size):
+                        line = f.readline()
+                        if not line:
+                            return valid_res
+
+                        line = line.split("\t")
+                        entry.append(line)
+                        genomes.add(line[1])
+                    if True:
+                        entry = sorted(entry, key=FragAnalyzer.get_fragment_number)
+                        str_entry = ["\t".join(a) for a in entry]
+                        if FragAnalyzer.check_consecutive_references(str_entry):
+                            valid_res.append(entry)
+                    f.readline()
+
+        results = read_file()
+        prepped_results = []
+        for read in results:
+            rows = []
+            for row in read:
+                row = "\t".join(row)
+                rows.append(row)
+            prepped_results.append("".join(rows))
+
+        with open(f"{self.parent_dir}/Output/Post_Proc_{self.output_file}.txt", "w") as out:
+            out.write("\n".join(prepped_results))
 
 

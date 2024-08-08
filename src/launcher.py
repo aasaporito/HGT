@@ -22,6 +22,7 @@ def setup_parser():
                        default=10, action="store")
     group.add_argument("-m", "--min-frags", help="Minimum matched fragments for candidacy [default: Equal to -s]",
                        type=int, default=None, action="store")
+    group.add_argument("-pp", help="Post processing for fragment mode. Filters out non-sequential genomes in results.", default=None, action="store_true")
 
     group = parser.add_argument_group('Rolling Window Options')
     group.add_argument("-w", "--window", help="Window step size [default: 10 percent]", type=int, default=10,
@@ -37,10 +38,11 @@ def fragment_launcher(args):
     result_mode = args.results is True
     input_file = args.input
     output_file = args.output
+    post_proc = args.pp
 
     if result_mode:
         print("Launching result processor")
-        frag_analyzer = FragAnalyzer(input_file, min_frags, output_file)
+        frag_analyzer = FragAnalyzer(input_file, frag_size, min_frags, output_file, post_proc)
         frag_analyzer.recollect_fragments()
     else:
         print("Launching fragment slicer")
