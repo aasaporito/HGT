@@ -54,7 +54,7 @@ class RollingWindow:
                         genome = fields[2]
 
                         id = full_id  #  full_id.split("/ccs")[0]
-                        if genome == "*" and sequence != '*':  # TODO : Reexamine this, why was it set to only when known genome?
+                        if genome == "*" and sequence != '*':
                             self.sequences[id] = sequence
                             self.genomes.append(genome + "\n")
 
